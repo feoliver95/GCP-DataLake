@@ -7,7 +7,7 @@ Solução de DataLake usando serviços de nuvem - Google Cloud Platform, com mel
 
 Utilizaremos as soluções:
 
-* Composer (Apache Airflow ) - Para orquestração dos nossos jobs de transformação e carregamento.
+* Composer (Apache Airflow ) - Para orquestração dos nossos jobs de transformação e ingestão.
 * Storage : Armazenamento dos arquivos de origem.
 
 * DataProc (Pyspark) - Para execução de Job Pyspark para transformação de arquivo CSV para Parquet, para os seguintes beneficios:
