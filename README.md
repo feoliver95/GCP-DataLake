@@ -312,5 +312,10 @@ Após a alteração e o upload dos arquivos alterados para a pasta job_dataproc 
 * project_id - alterando para o id do seu projeto GCP
 * bucketname - com o nome do bucket criado anteriormente.
 
-Após realizar as alterações, fazer a importação desse arquivo para o nosso ambiente composer  GCP em "Dags"
+Após realizar as alterações, fazer a importação desse arquivo para o nosso ambiente composer  GCP em "Dags" e executar
+
+WorkFlow:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/Dag%20-%20Graph%20View.PNG)
+
 
