@@ -1,4 +1,5 @@
 
+
 # Dotz - DataLake
 
 ## Arquitetura
@@ -25,13 +26,20 @@ Utilizaremos as soluções:
 
 #### Modelo Conceitual das tabelas:
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/modelo_conceitual.PNG)
 
+* Schema:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/schema.png)
 
 
 #### Modelo tabela final:
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/imgs/flat_grafico.PNG)
 
 * Schema:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/imgs/schema_flat_grafico.PNG)
 
 
 ### Pré requisitos
@@ -57,7 +65,7 @@ Utilizaremos as soluções:
 
 Vamos executar nossos jobs de criação de tabelas, de views, de dataproc e etc usando cloud shell.
 Abrir Cloud Shell e certificar que estamos no projeto correto.
-* Por garantia execute o comando 
+* Por garantia execute o comando , no lugar do [PROJECT_ID] adicione o id do seu projeto.
 
 		gcloud config set project [PROJECT_ID]
 
@@ -277,9 +285,11 @@ Tabela: bill_of_materials_unpivot
       UNNEST(bills.componentes) AS metricas'
 	    
     
- Quando foi feito o unpivot da tabela bills_of_materials, a tabela passou a ter mais linha, sendo que cada "cubo" tem mais de um componente, cada linha do tubo material tem 8 colunas de components_id, com o unpivot a quantidade de linhas dessa tabela passou ser 8x maior.
+ Quando foi feito o unpivot da tabela bills_of_materials, a tabela passou a ter mais linha, sendo que cada "cubo" tem mais de um componente, cada linha do tubo material tem 8 colunas de components_id. Com o unpivot a quantidade de linhas dessa tabela passou ser 8x maior.
+ 
  Solução: 1 - com a tabela 'unpivot' vamos realizar o join com a tabela comp_boss para obtermos as informações de cada componente
- 2 - Com as informações dos componente, vamos estruturar os valores de array, usando como chave o id do cubo_material, onde que no resultados teremos informações para cada cubo um array com informações dos materiais utilizadados.
+ 
+ 2 - Com as informações dos componente, vamos estruturar os valores de array, usando como chave o id do cubo_material, onde que no resultados teremos informações para cada cubo uma lista de  array com informações dos materiais utilizados.
  Vamos guardar o resultado em uma tabela chamada: nested_materials onde contem a coluna chave do cubo mais o array com informações dos componentes.
  
 
@@ -304,7 +314,7 @@ Tabela: bill_of_materials_unpivot
     group by tube_assembly_id
     order by tube_assembly_id'
 
-Agora sim, podemos realizar o join da tabela price_quote com a tabela nasted_materials. Onde teremos as informações das cotas do tubo e um ARRAY com informações do componente daquele respectivo cubo gerando assim a tabela final para ser consumida pelo relatório
+Agora sim, podemos realizar o join da tabela price_quote com a tabela nasted_materials. Onde teremos as informações das cotas do tubo e uma lista ARRAY com informações do componente daquele respectivo cubo gerando assim a tabela final para ser consumida pelo relatório
 
     bq query \
     --destination_table visualizacao.flat_grafico \
