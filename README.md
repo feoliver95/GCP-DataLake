@@ -319,3 +319,7 @@ WorkFlow:
 ![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/Dag%20-%20Graph%20View.PNG)
 
 
+### Dashboard:
+
+https://datastudio.google.com/reporting/481729d5-f03b-42a5-ae22-42687a6c1571
+
