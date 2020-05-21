@@ -1,4 +1,4 @@
-# Teste Dotz - DataLake
+# Dotz - DataLake
 
 ## Arquitetura
 Solução de DataLake usando serviços de nuvem - Google Cloud Platform, com melhores praticas de desenvolvimento.
@@ -29,7 +29,7 @@ Utilizaremos as soluções:
 
 ### Configurando Ambiente GCP
 
-* Dentro do ambiente GCP em Storage , criar um Bucket com o nome desejado e anotar esse nome porque vamos utilizar posteriormente em variáveis em nossos jobs Pyspark e Composer. Dentro do Storage Criar as seguintes pastas:
+* Dentro do ambiente GCP em Storage , criar um **Bucket** com o nome desejado e **anotar esse nome porque vamos utilizar posteriormente** **em variáveis** em nossos jobs Pyspark e Composer. Dentro do Storage Criar as seguintes pastas:
 	* origem-stage
 	* origem-stage-parquet
 	* jobs_dataproc
@@ -40,6 +40,25 @@ Utilizaremos as soluções:
 	* dotz_lake
 	* dotz_views
 	* visualizacao
+	
+### Abrindo Cloud Shell
+
+Vamos executar nossos jobs de criação de tabelas, de views, de dataproc e etc usando cloud shell.
+Abrir Cloud Shell e certificar que estamos no projeto correto.
+* Por garantia execute o comando 
+
+		gcloud config set project [PROJECT_ID]
+
+Vamos definir algumas variaveis essencias que iremos utilizar ao decorrer do processo.
+Adicione nome do seu projeto
+
+    PROJECT_ID=meuprojetoid
+
+nome do bucket criado anteriormente, somente o nome, por ex:
+gs://meubucketcriado/
+
+    BUCKET_ID=meubucketcriado
+
 
 
 ### Criando Datasets no BigQuery
@@ -108,7 +127,7 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
         --master-machine-type n1-standard-2 \
         --worker-machine-type n1-standard-2 \
     	--region=us-central1 --zone=us-central1-a \
-    	--bucket=dots-project
+    	--bucket=$BUCKET_ID
 
 
 2 - Para enviar os jobs Pyspark utilize os comandos
@@ -117,13 +136,13 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
  
 
         gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-              gs://dots-project/jobs_dataproc/CsvToParquet-bill_of_materials.py --region=us-central1
+              gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-bill_of_materials.py --region=us-central1
  * Job price_quote
 
 	
 
 		  gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-    		 gs://dots-project/jobs_dataproc/CsvToParquet-price_quote.py --region=us-central1
+    		 gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-price_quote.py --region=us-central1
           
 * Job comp_boss
 
@@ -131,7 +150,7 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
    
 
       gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-          gs://dots-project/jobs_dataproc/CsvToParquet-comp_boss.py --region=us-central1
+          gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-comp_boss.py --region=us-central1
 
 * Deletando Cluster
 
@@ -147,7 +166,7 @@ Ingestão bill of materials
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.bills_of_materials \
-        gs://dots-project/origem-stage-parquet/carga/bill_of_materials/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/bill_of_materials/*.parquet
 
 Ingestão price_quote
 
@@ -155,7 +174,7 @@ Ingestão price_quote
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.price_quote \
-        gs://dots-project/origem-stage-parquet/carga/price_quote/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/price_quote/*.parquet
 
 Ingestão comp_boss
 
@@ -163,7 +182,7 @@ Ingestão comp_boss
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.comp_boss \
-        gs://dots-project/origem-stage-parquet/carga/comp_boss/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/comp_boss/*.parquet
 	
  ### Criando Views deduplicadoras no BigQuery
 
