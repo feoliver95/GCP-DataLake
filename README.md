@@ -3,6 +3,7 @@
 ## Arquitetura
 Solução de DataLake usando serviços de nuvem - Google Cloud Platform, com melhores praticas de desenvolvimento.
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/Arquitetura.png)
 
 Utilizaremos as soluções:
 
