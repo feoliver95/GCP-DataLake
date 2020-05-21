@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 #Nome do bucket
-bucketname="dots-project"
+bucketname="dotz-project"
 
 
 

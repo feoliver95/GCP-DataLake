@@ -54,7 +54,7 @@ zone="southamerica-east1-a"
 default_args = {
             'owner': 'Felipe Oliveira',
             'depends_on_past': False,
-            'start_date': datetime(2020,5,19),
+            'start_date':airflow.utils.dates.days_ago(1),
             'retries': 1,
             'retry_delay': timedelta(minutes=2),
             'dataflow_default_options': {
@@ -90,7 +90,7 @@ create_cluster = DataprocClusterCreateOperator(
 
 job_price_quote= DataProcPySparkOperator(
         task_id="job_price_quote",
-        main=caminho_jobs+"CsvToParquet-price_quote.py",
+        main=caminho_jobs+"CsvToParquet-price_quote_composer.py",
         cluster_name='parquet-converter',
         region=region,
         dag=dag
@@ -98,7 +98,7 @@ job_price_quote= DataProcPySparkOperator(
 
 job_comp_boss= DataProcPySparkOperator(
         task_id="job_comp_boss",
-        main=caminho_jobs+"CsvToParquet-comp_boss.py",
+        main=caminho_jobs+"CsvToParquet-comp_boss_composer.py",
         cluster_name='parquet-converter',
         region=region,
         dag=dag
@@ -106,7 +106,7 @@ job_comp_boss= DataProcPySparkOperator(
 
 job_bills_of_materials= DataProcPySparkOperator(
         task_id="job_bills_of_materials",
-        main=caminho_jobs+"CsvToParquet-bill_of_materials.py",
+        main=caminho_jobs+"CsvToParquet-bill_of_materials_composer.py",
         cluster_name='parquet-converter',
         region=region,
         dag=dag
