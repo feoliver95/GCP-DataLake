@@ -25,13 +25,20 @@ Utilizaremos as soluções:
 
 #### Modelo Conceitual das tabelas:
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/modelo_conceitual.PNG)
 
+* Schema:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/schema.png)
 
 
 #### Modelo tabela final:
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/imgs/flat_grafico.PNG)
 
 * Schema:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/imgs/schema_flat_grafico.PNG)
 
 
 ### Pré requisitos
@@ -57,7 +64,7 @@ Utilizaremos as soluções:
 
 Vamos executar nossos jobs de criação de tabelas, de views, de dataproc e etc usando cloud shell.
 Abrir Cloud Shell e certificar que estamos no projeto correto.
-* Por garantia execute o comando 
+* Por garantia execute o comando , no lugar do [PROJECT_ID] adicione o id do seu projeto.
 
 		gcloud config set project [PROJECT_ID]
 
