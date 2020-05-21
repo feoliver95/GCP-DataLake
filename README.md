@@ -1,3 +1,4 @@
+
 # Dotz - DataLake
 
 ## Arquitetura
@@ -21,6 +22,17 @@ Utilizaremos as soluções:
 * 1 - Camada Stage - onde os dados serão armazenados em tabelas particionadas por data de ingestao(timestamp)
 * 2 - Camada de View Deduplicadora - Onde os dados serão deduplicados, pegando somente dados da partição da ultima data de ingestão.
 * 3- Camada Visualização - Tabelas materializada com seus respectivos Joins , para consumo dos Dashboard envolvido ( Sendo assim os joins serão realizados uma unica vez e o dashboard não precisara realizar os joins(que não é bom no bigquery) para gerar sua visão de negocio.
+
+#### Modelo Conceitual das tabelas:
+
+
+
+
+#### Modelo tabela final:
+
+
+* Schema:
+
 
 ### Pré requisitos
 
@@ -115,10 +127,10 @@ Tabela bills_of_materials
 	* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
 	* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
 
-## Executando Job de ingestão (sem o Composer)
+## Executando Job de Dataproc transformação
 
-### Execução do Job Pyspark de conversão de arquivos CSV para parquet.
-**Obs**: Caso queira pular essa tapa de Dataproc, na pasta **files_parquet** tem a pasta '**carga**', nela tem os arquivos já transformado. pode realizar o upload manualmente no Storage na pasta **origem-stage-parquet**/e lá e fazer o upload.
+#### Execução do Job Pyspark de conversão de arquivos CSV para parquet.
+**Obs**: Caso queira pular essa tapa de Dataproc, na pasta **files_parquet** tem a pasta '**carga**', nela tem os arquivos já transformado. pode realizar o upload manualmente no Storage na pasta **origem-stage-parquet**/
 	
 1 - Criar maquina do Dataproc. Execute os comandos abaixo:
 obs: altere o parametro do bucket para o nome do bucket que foi criado.
@@ -318,11 +330,21 @@ Agora sim, podemos realizar o join da tabela price_quote com a tabela nasted_mat
       nm.tube_assembly_id DESC'
 
 ### Automatizando e orquestrando todo processo usando o composer(Apache Airflow)
+1 - Criar ambiente. Execute o comando:
+  
 
-1- Na pasta '**jobs_dataproc**' onde fizemos as alterações anteriormente dos arquivos pyspark, agora vamos fazer tambem as mesmas alterações
+      gcloud beta composer environments create dotz-workflow \
+            --location us-central1 \
+            --zone us-central1-f \
+            --machine-type n1-standard-2 \
+            --image-version composer-latest-airflow-x.y.z \
+            --labels env=beta  
+
+2- Na pasta '**jobs_dataproc**' onde fizemos as alterações anteriormente dos arquivos pyspark, agora vamos fazer tambem as mesmas alterações
+
 Arquivos: **CsvToParquet-bill_of_materials_composer.py,** **CsvToParquet-comp_boss_composer.py**, **CsvToParquet-**price_quote_composer.p**y.** Para cada um deles:
-	* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
-	* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
+* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
+* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
 
 Obs: A diferença desses arquivos para os outros que alteramos anteriormente é que nesse o job guarda o resultado da transformação no storage particionando pela data da carga.
 Ex: carga_20052020.
