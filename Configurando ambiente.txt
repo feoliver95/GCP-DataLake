@@ -1,0 +1,133 @@
+#Criando os Dataset no BigQuery
+
+#criando dataset dotz_lake
+
+bq mk \
+--dataset \
+dotz_lake
+
+
+#criando dataset dotz_views
+
+bq mk \
+--dataset \
+dotz_views
+
+#criando dataset visualizacao
+
+bq mk \
+--dataset \
+visualizacao
+
+
+#Criando as tabelas no BigQuery
+
+#Tabela bills_of_materials`
+bq mk \
+--table \
+--time_partitioning_type=DAY \
+dotz_lake.bills_of_materials \
+
+#Tabela comp_boss``
+bq mk \
+--table \
+--time_partitioning_type=DAY \
+dotz_lake.comp_boss \
+
+#Tabela price_quote
+bq mk \
+--table \
+--time_partitioning_type=DAY \
+dotz_lake.price_quote \
+
+
+
+
+#Criando As Views Deduplicadores
+
+bq mk \
+--use_legacy_sql=false \
+--description "description" \
+--view 'SELECT *
+FROM `dotz_lake.comp_boss`    
+WHERE DATE(_PARTITIONTIME) = DATE((SELECT max(_PARTITIONTIME) as maximo from `dotz_lake.comp_boss` )) ' \
+dotz_views.comp_boss_view_teste 
+
+bq mk \
+--use_legacy_sql=false \
+--description "description" \
+--view 'SELECT *
+FROM `dotz_lake.price_quote`   
+WHERE DATE(_PARTITIONTIME) = DATE((SELECT max(_PARTITIONTIME) as maximo from `dotz_lake.price_quote` )) ' \
+dotz_views.price_quote_view_teste  
+
+bq mk \
+--use_legacy_sql=false \
+--description "description" \
+--view 'SELECT *
+FROM `dotz_lake.bills_of_materials` 
+WHERE DATE(_PARTITIONTIME) = DATE((SELECT max(_PARTITIONTIME) as maximo from `dotz_lake.bills_of_materials`)) ' \
+dotz_views.bills_of_materials_view_teste
+
+
+
+
+#Criando Cluster
+
+gcloud dataproc clusters create parquet-converter \
+    --master-machine-type n1-standard-2 \
+    --worker-machine-type n1-standard-2 \
+	--region=us-central1 --zone=us-central1-a \
+	--bucket=dots-project
+	
+	
+#Executando job no cluster:
+
+#bill_of_materials
+gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
+      gs://dots-project/jobs_dataproc/CsvToParquet-bill_of_materials.py --region=us-central1
+	  
+	  
+#comp_boss
+
+gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
+      gs://dots-project/jobs_dataproc/CsvToParquet-comp_boss.py --region=us-central1
+	  
+#price_quote
+
+gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
+      gs://dots-project/jobs_dataproc/CsvToParquet-price_quote.py --region=us-central1
+	  
+	  
+#Deletando Cluster
+
+gcloud dataproc clusters delete parquet-converter --region=us-central1
+
+
+
+Ingesao de dados bq.
+
+#bill_of_materials
+
+bq load \
+    --source_format=PARQUET \
+	--time_partitioning_type=DAY \
+    dotz_lake.bills_of_materials \
+    gs://dots-project/origem-stage-parquet/carga/bill_of_materials/*.parquet
+	
+	
+#comp_boss
+
+bq load \
+    --source_format=PARQUET \
+	--time_partitioning_type=DAY \
+    dotz_lake.bills_of_materials \
+    gs://dots-project/origem-stage-parquet/carga/comp_boss/*.parquet
+	
+#price_quote
+
+bq load \
+    --source_format=PARQUET \
+	--time_partitioning_type=DAY \
+    dotz_lake.bills_of_materials \
+    gs://dots-project/origem-stage-parquet/carga/price_quote/*.parquet

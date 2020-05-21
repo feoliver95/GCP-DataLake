@@ -1,0 +1,12 @@
+
+
+Obs:
+
+Identifiquei que tinha produtos que não tinha id do componente (todos NA).
+
+Nem todos componentes da tabela bill_of_materials tinha seu id relacionado na tabela comp_boss
+
+Foi encontrado somente 897 de relações de componentes_id (eu retorno somente os que foram encontrado e guardo em um array para o price)
+
+
+

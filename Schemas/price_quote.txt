@@ -1,0 +1,8 @@
+StructField(tube_assembly_id,StringType,true)
+StructField(supplier,StringType,true)
+StructField(quote_date,TimestampType,true)
+StructField(annual_usage,IntegerType,true)
+StructField(min_order_quantity,IntegerType,true)
+StructField(bracket_pricing,StringType,true)
+StructField(quantity,IntegerType,true)
+StructField(cost,DoubleType,true)
