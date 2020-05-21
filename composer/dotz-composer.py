@@ -82,6 +82,7 @@ create_cluster = DataprocClusterCreateOperator(
         num_workers=2,
         region=region,
         zone=zone,
+        storage_bucket =bucketname,
         master_disk_size=15,
         dag=dag
 
