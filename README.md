@@ -1,12 +1,14 @@
-# Teste Dotz - DataLake
+
+# Dotz - DataLake
 
 ## Arquitetura
 Solução de DataLake usando serviços de nuvem - Google Cloud Platform, com melhores praticas de desenvolvimento.
 
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/Arquitetura.png)
 
 Utilizaremos as soluções:
 
-* Composer (Apache Airflow ) - Para orquestração dos nossos jobs de transformação e carregamento.
+* Composer (Apache Airflow ) - Para orquestração dos nossos jobs de transformação e ingestão.
 * Storage : Armazenamento dos arquivos de origem.
 
 * DataProc (Pyspark) - Para execução de Job Pyspark para transformação de arquivo CSV para Parquet, para os seguintes beneficios:
@@ -21,6 +23,17 @@ Utilizaremos as soluções:
 * 2 - Camada de View Deduplicadora - Onde os dados serão deduplicados, pegando somente dados da partição da ultima data de ingestão.
 * 3- Camada Visualização - Tabelas materializada com seus respectivos Joins , para consumo dos Dashboard envolvido ( Sendo assim os joins serão realizados uma unica vez e o dashboard não precisara realizar os joins(que não é bom no bigquery) para gerar sua visão de negocio.
 
+#### Modelo Conceitual das tabelas:
+
+
+
+
+#### Modelo tabela final:
+
+
+* Schema:
+
+
 ### Pré requisitos
 
 * Conta Google Cloud Platform
@@ -28,7 +41,7 @@ Utilizaremos as soluções:
 
 ### Configurando Ambiente GCP
 
-* Dentro do ambiente GCP em Storage , criar um Bucket com o nome desejado e anotar esse nome porque vamos utilizar posteriormente em variáveis em nossos jobs Pyspark e Composer. Dentro do Storage Criar as seguintes pastas:
+* Dentro do ambiente GCP em Storage , criar um **Bucket** com o nome desejado e **anotar esse nome porque vamos utilizar posteriormente** **em variáveis** em nossos jobs Pyspark e Composer. Dentro do Storage Criar as seguintes pastas:
 	* origem-stage
 	* origem-stage-parquet
 	* jobs_dataproc
@@ -39,6 +52,25 @@ Utilizaremos as soluções:
 	* dotz_lake
 	* dotz_views
 	* visualizacao
+	
+### Abrindo Cloud Shell
+
+Vamos executar nossos jobs de criação de tabelas, de views, de dataproc e etc usando cloud shell.
+Abrir Cloud Shell e certificar que estamos no projeto correto.
+* Por garantia execute o comando 
+
+		gcloud config set project [PROJECT_ID]
+
+Vamos definir algumas variaveis essencias que iremos utilizar ao decorrer do processo.
+Adicione nome do seu projeto
+
+    PROJECT_ID=meuprojetoid
+
+nome do bucket criado anteriormente, somente o nome, por ex:
+gs://meubucketcriado/
+
+    BUCKET_ID=meubucketcriado
+
 
 
 ### Criando Datasets no BigQuery
@@ -95,10 +127,10 @@ Tabela bills_of_materials
 	* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
 	* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
 
-## Executando Job de ingestão (sem o Composer)
+## Executando Job de Dataproc transformação
 
-### Execução do Job Pyspark de conversão de arquivos CSV para parquet.
-**Obs**: Caso queira pular essa tapa de Dataproc, na pasta **files_parquet** tem a pasta '**carga**', nela tem os arquivos já transformado. pode realizar o upload manualmente no Storage na pasta **origem-stage-parquet**/e lá e fazer o upload.
+#### Execução do Job Pyspark de conversão de arquivos CSV para parquet.
+**Obs**: Caso queira pular essa tapa de Dataproc, na pasta **files_parquet** tem a pasta '**carga**', nela tem os arquivos já transformado. pode realizar o upload manualmente no Storage na pasta **origem-stage-parquet**/
 	
 1 - Criar maquina do Dataproc. Execute os comandos abaixo:
 obs: altere o parametro do bucket para o nome do bucket que foi criado.
@@ -107,7 +139,7 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
         --master-machine-type n1-standard-2 \
         --worker-machine-type n1-standard-2 \
     	--region=us-central1 --zone=us-central1-a \
-    	--bucket=dots-project
+    	--bucket=$BUCKET_ID
 
 
 2 - Para enviar os jobs Pyspark utilize os comandos
@@ -116,13 +148,13 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
  
 
         gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-              gs://dots-project/jobs_dataproc/CsvToParquet-bill_of_materials.py --region=us-central1
+              gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-bill_of_materials.py --region=us-central1
  * Job price_quote
 
 	
 
 		  gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-    		 gs://dots-project/jobs_dataproc/CsvToParquet-price_quote.py --region=us-central1
+    		 gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-price_quote.py --region=us-central1
           
 * Job comp_boss
 
@@ -130,7 +162,7 @@ obs: altere o parametro do bucket para o nome do bucket que foi criado.
    
 
       gcloud dataproc jobs submit pyspark --cluster=parquet-converter \
-          gs://dots-project/jobs_dataproc/CsvToParquet-comp_boss.py --region=us-central1
+          gs://$BUCKET_ID/jobs_dataproc/CsvToParquet-comp_boss.py --region=us-central1
 
 * Deletando Cluster
 
@@ -146,7 +178,7 @@ Ingestão bill of materials
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.bills_of_materials \
-        gs://dots-project/origem-stage-parquet/carga/bill_of_materials/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/bill_of_materials/*.parquet
 
 Ingestão price_quote
 
@@ -154,7 +186,7 @@ Ingestão price_quote
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.price_quote \
-        gs://dots-project/origem-stage-parquet/carga/price_quote/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/price_quote/*.parquet
 
 Ingestão comp_boss
 
@@ -162,7 +194,7 @@ Ingestão comp_boss
         --source_format=PARQUET \
     	--time_partitioning_type=DAY \
         dotz_lake.comp_boss \
-        gs://dots-project/origem-stage-parquet/carga/comp_boss/*.parquet
+        gs://$BUCKET_ID/origem-stage-parquet/carga/comp_boss/*.parquet
 	
  ### Criando Views deduplicadoras no BigQuery
 
@@ -298,11 +330,21 @@ Agora sim, podemos realizar o join da tabela price_quote com a tabela nasted_mat
       nm.tube_assembly_id DESC'
 
 ### Automatizando e orquestrando todo processo usando o composer(Apache Airflow)
+1 - Criar ambiente. Execute o comando:
+  
 
-1- Na pasta '**jobs_dataproc**' onde fizemos as alterações anteriormente dos arquivos pyspark, agora vamos fazer tambem as mesmas alterações
+      gcloud beta composer environments create dotz-workflow \
+            --location us-central1 \
+            --zone us-central1-f \
+            --machine-type n1-standard-2 \
+            --image-version composer-latest-airflow-x.y.z \
+            --labels env=beta  
+
+2- Na pasta '**jobs_dataproc**' onde fizemos as alterações anteriormente dos arquivos pyspark, agora vamos fazer tambem as mesmas alterações
+
 Arquivos: **CsvToParquet-bill_of_materials_composer.py,** **CsvToParquet-comp_boss_composer.py**, **CsvToParquet-**price_quote_composer.p**y.** Para cada um deles:
-	* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
-	* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
+* Abrir o Arquivo e alterar a variável '**bucketname'** para o nome do bucket que foi criado anteriormente
+* Após realizar as alteraçoes, no storage na pasta criada "**jobs_dataproc"** fazer a importação desses arquivos.
 
 Obs: A diferença desses arquivos para os outros que alteramos anteriormente é que nesse o job guarda o resultado da transformação no storage particionando pela data da carga.
 Ex: carga_20052020.
@@ -311,5 +353,14 @@ Após a alteração e o upload dos arquivos alterados para a pasta job_dataproc 
 * project_id - alterando para o id do seu projeto GCP
 * bucketname - com o nome do bucket criado anteriormente.
 
-Após realizar as alterações, fazer a importação desse arquivo para o nosso ambiente composer  GCP em "Dags"
+Após realizar as alterações, fazer a importação desse arquivo para o nosso ambiente composer  GCP em "Dags" e executar
+
+WorkFlow:
+
+![picture](https://github.com/feoliver95/GCP-DataLake/blob/master/Dag%20-%20Graph%20View.PNG)
+
+
+### Dashboard:
+
+https://datastudio.google.com/reporting/481729d5-f03b-42a5-ae22-42687a6c1571
 
