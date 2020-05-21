@@ -1,5 +1,6 @@
 
 
+
 # Dotz - DataLake
 
 ## Arquitetura
@@ -347,7 +348,6 @@ Agora sim, podemos realizar o join da tabela price_quote com a tabela nasted_mat
             --location us-central1 \
             --zone us-central1-f \
             --machine-type n1-standard-2 \
-            --image-version composer-latest-airflow-x.y.z \
             --labels env=beta  
 
 2- Na pasta '**jobs_dataproc**' onde fizemos as alterações anteriormente dos arquivos pyspark, agora vamos fazer tambem as mesmas alterações
@@ -359,9 +359,9 @@ Arquivos: **CsvToParquet-bill_of_materials_composer.py,** **CsvToParquet-comp_bo
 Obs: A diferença desses arquivos para os outros que alteramos anteriormente é que nesse o job guarda o resultado da transformação no storage particionando pela data da carga.
 Ex: carga_20052020.
 
-Após a alteração e o upload dos arquivos alterados para a pasta job_dataproc no storage, vamos alterar os padrados da nossa Dag que sera utilizada no composer. Na pasta composer temos o arquivo 'dotz-composer.py',abrir e alterar as variaveis:
-* project_id - alterando para o id do seu projeto GCP
-* bucketname - com o nome do bucket criado anteriormente.
+Após a alteração e o upload dos arquivos alterados para a pasta **job_dataproc** no **storage**, vamos alterar os variavies da nossa Dag que sera utilizada no composer. Na pasta **composer** temos o arquivo 'dotz-composer.py',abrir e alterar as variaveis:
+* **project_id** - alterando para o id do seu projeto GCP
+* **bucketname** - com o nome do bucket criado anteriormente.
 
 Após realizar as alterações, fazer a importação desse arquivo para o nosso ambiente composer  GCP em "Dags" e executar
 
